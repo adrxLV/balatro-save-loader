@@ -39,22 +39,50 @@ function makeValuesTab(values) {
         render: (ctx) => {
             try {
                 const { dataDiv, data, setCanClose } = ctx;
+                
+                // Create a form container for better styling
+                const formContainer = document.createElement('div');
+                formContainer.className = 'form-container';
+                
                 values.forEach((value) => {
+                    // Create form group for each field
+                    const formGroup = document.createElement('div');
+                    formGroup.className = 'form-group';
+                    
                     const label = document.createElement('label');
-                    label.textContent = value.name + ': ';
-                    dataDiv.appendChild(label);
+                    label.textContent = value.name;
+                    label.className = 'form-label';
+                    
                     if (value.type !== 'label') {
+                        const inputWrapper = document.createElement('div');
+                        inputWrapper.className = 'input-wrapper';
+                        
                         const input = document.createElement('input');
                         input.type = value.type;
+                        input.className = 'form-control';
+                        
                         if (value.type === 'checkbox') {
                             input.checked = get(data, value.path) ?? value.default;
+                            input.className = 'form-checkbox';
+                            
+                            // For checkboxes, create a special layout
+                            const checkboxWrapper = document.createElement('div');
+                            checkboxWrapper.className = 'checkbox-wrapper';
+                            checkboxWrapper.appendChild(input);
+                            checkboxWrapper.appendChild(label);
+                            formGroup.appendChild(checkboxWrapper);
                         } else {
-                            input.value = get(data, value.path) ?? value.default;
+                            input.value = get(data, value.path) ?? value.default ?? '';
+                            if(value.type === 'number') {
+                                input.step = value.step ?? 'any';
+                            }
+                            input.placeholder = `Enter ${value.name.toLowerCase()}...`;
+                            
+                            formGroup.appendChild(label);
+                            inputWrapper.appendChild(input);
+                            formGroup.appendChild(inputWrapper);
                         }
-                        if(value.type === 'number') {
-                            input.step = value.step ?? 'any';
-                        }
-                        input.placeholder = value.name;
+                        
                         input.name = value.path;
                         input.addEventListener('change', () => {
                             validateInputs({ target: input });
@@ -74,13 +102,26 @@ function makeValuesTab(values) {
                                 setCanClose(false);
                             }
                         });
-                        dataDiv.appendChild(input);
+                    } else {
+                        // For label-only items
+                        label.className = 'form-label-only';
+                        formGroup.appendChild(label);
                     }
-                    dataDiv.appendChild(document.createElement('br'));
+                    
+                    formContainer.appendChild(formGroup);
                 });
+                
+                dataDiv.appendChild(formContainer);
             } catch (e) {
                 console.error(e);
-                ctx.dataDiv.innerText = 'Error processing save data: ' + e.message;
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.innerHTML = `
+                    <h3>❌ Error processing save data</h3>
+                    <p><strong>Error:</strong> ${e.message}</p>
+                    <p>Please make sure the save file is valid.</p>
+                `;
+                ctx.dataDiv.appendChild(errorDiv);
             }
         },
         save: (ctx) => {
@@ -88,7 +129,7 @@ function makeValuesTab(values) {
                 if(value.type === 'label') return;
                 const input = ctx.dataDiv.querySelector(`input[name="${value.path}"]`);
                 if (!input) return;
-                if (input.value === '') {
+                if (input.value === '' && input.type !== 'checkbox') {
                     return;
                 }
                 saveFormInput(input, value.type, value.path, ctx.data);

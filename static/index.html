@@ -1,22 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Balatro Save Editor</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <meta name="description" content="Modern save file editor for Balatro - easily modify your game saves">
     <link rel='stylesheet' type='text/css' media='screen' href='css/main.css'>
     <script src='js/main.js' type="module"></script>
 </head>
 
 <body>
-    <h1>Balatro Save Editor</h1>
-    <input type="file" id="file" name="file" />
-    <br>
-    <button id="download" disabled>Download</button>
-    <div id="buttons"></div>
-    <div id="data"></div>
+    <div class="container">
+        <header class="header">
+            <h1>Balatro Save Editor</h1>
+            <p>Easily modify and manage your Balatro save files</p>
+        </header>
+
+        <main>
+            <div class="card">
+                <div class="file-upload-area" id="file-upload-area">
+                    <div class="file-upload-icon">📁</div>
+                    <div class="file-upload-text">
+                        <strong>Choose a save file</strong> or drag and drop
+                    </div>
+                    <div class="file-upload-hint">
+                        Supports .jkr, .dat and other Balatro save formats
+                    </div>
+                    <input type="file" id="file" name="file" accept=".jkr,.dat" />
+                </div>
+                
+                <div class="action-bar">
+                    <button id="download" class="btn btn-success" disabled>
+                        <span class="download-icon">⬇️</span>
+                        Download Modified Save
+                    </button>
+                </div>
+            </div>
+
+            <div id="content-area" style="display: none;">
+                <div class="card">
+                    <nav class="tab-nav" id="buttons" role="tablist"></nav>
+                    <div id="data" role="tabpanel"></div>
+                </div>
+            </div>
+        </main>
+    </div>
 </body>
 
 </html>
